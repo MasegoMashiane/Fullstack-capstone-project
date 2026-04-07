@@ -1,16 +1,75 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';                // Task 3
+import { useAppContext } from '../../context/AuthContext';     // Task 2
+import { urlConfig } from '../../config';                      // Task 1
 import './LoginPage.css';
 
 function LoginPage() {
-
     // State variables
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [incorrect, setIncorrect] = useState('');            // Task 4: state for error message
 
-    // Handle login action
-    const handleLogin = async () => {
-        console.log("Inside handleLogin");
-        console.log({ email, password });
+    // Navigation and context
+    const navigate = useNavigate();                             // Task 5
+    const { setIsLoggedIn } = useAppContext();                 // Task 5
+    const bearerToken = sessionStorage.getItem('auth-token');   // Task 5
+
+    // Redirect if user already logged in
+    useEffect(() => {                                         // Task 6
+        if (bearerToken) {
+            setIsLoggedIn(true);
+            navigate('/app');
+        }
+    }, [bearerToken, navigate, setIsLoggedIn]);
+
+     // Handle login action
+     const handleLogin = async () => {
+        try {
+            const response = await fetch(`${urlConfig.backendUrl}/api/auth/login`, {
+                // Task 7: Set method
+                method: 'POST',
+
+                // Task 8: Set headers
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': bearerToken ? `Bearer ${bearerToken}` : '',
+                },
+
+                // Task 9: Set body
+                body: JSON.stringify({
+                    email: email,
+                    password: password
+                })
+            });
+
+            // Step 2 - Task 1: Access JSON data
+            const json = await response.json();
+
+            // Step 2 - Tasks 2–4: Set session + login + navigate
+            if (json.authtoken) {
+                sessionStorage.setItem('auth-token', json.authtoken);
+                sessionStorage.setItem('name', json.userName);
+                sessionStorage.setItem('email', json.userEmail);
+
+                setIsLoggedIn(true);
+                navigate('/app');
+            } 
+            // Step 2 - Task 5: Handle incorrect login
+            else {
+                document.getElementById("email").value = "";
+                document.getElementById("password").value = "";
+
+                setIncorrect("Wrong password. Try again.");
+
+                setTimeout(() => {
+                    setIncorrect("");
+                }, 2000);
+            }
+
+        } catch (e) {
+            console.log("Error fetching details: " + e.message);
+        }
     };
 
     return (
@@ -45,6 +104,17 @@ function LoginPage() {
                                 onChange={(e) => setPassword(e.target.value)}
                             />
                         </div>
+
+                        {/* Task 6: Error message display */}
+                        <span style={{
+                            color: 'red',
+                            height: '.5cm',
+                            display: 'block',
+                            fontStyle: 'italic',
+                            fontSize: '12px'
+                        }}>
+                            {incorrect}
+                        </span>
 
                         {/* Login Button */}
                         <button 
