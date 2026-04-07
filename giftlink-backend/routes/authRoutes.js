@@ -19,23 +19,17 @@ const JWT_SECRET = process.env.JWT_SECRET;
 
 router.post('/register', async (req, res) => {
     try {
-        // Task 1: Connect to `giftsdb` in MongoDB through `connectToDatabase` in `db.js`
         const db = await connectToDatabase();
-
-        // Task 2: Access MongoDB collection
         const collection = db.collection("users");
 
-        // Task 3: Check for existing email
         const existingEmail = await collection.findOne({ email: req.body.email });
         if (existingEmail) {
             return res.status(400).json({ message: 'Email already registered' });
         }
 
-        // Hash the password
         const salt = await bcryptjs.genSalt(10);
         const hash = await bcryptjs.hash(req.body.password, salt);
 
-        // Task 4: Save user details in database
         const newUser = await collection.insertOne({
             email: req.body.email,
             firstName: req.body.firstName,
@@ -44,7 +38,6 @@ router.post('/register', async (req, res) => {
             createdAt: new Date(),
         });
 
-        // Task 5: Create JWT authentication with user._id as payload
         const payload = {
             user: {
                 id: newUser.insertedId,
@@ -56,6 +49,50 @@ router.post('/register', async (req, res) => {
         logger.info('User registered successfully');
 
         res.json({ authtoken, email: req.body.email });
+    } catch (e) {
+        logger.error(e);
+        return res.status(500).send('Internal server error');
+    }
+});
+
+//Step 2 - Task 1: Implement /login endpoint
+router.post('/login', async (req, res) => {
+    try {
+        // Step 2 - Task 2: Connect to database
+        const db = await connectToDatabase();
+        const collection = db.collection('users');
+
+        // Step 2 - Task 3: Check for user credentials
+        const theUser = await collection.findOne({ email: req.body.email });
+
+        // Step 2 - Task 7: Send error if user not found
+        if (!theUser) {
+            logger.error('User not found');
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        // Step 2 - Task 4: Compare passwords
+        const passwordMatch = await bcryptjs.compare(req.body.password, theUser.password);
+        if (!passwordMatch) {
+            logger.error('Passwords do not match');
+            return res.status(404).json({ error: 'Wrong password' });
+        }
+
+        // Step 2 - Task 5: Fetch user details
+        const userName = theUser.firstName;
+        const userEmail = theUser.email;
+
+        // Step 2 - Task 6: Create JWT token
+        const payload = {
+            user: {
+                id: theUser._id.toString(),
+            },
+        };
+        const authtoken = jwt.sign(payload, JWT_SECRET, { expiresIn: '1h' });
+
+        // Send response with token and user details
+        res.json({ authtoken, userName, userEmail });
+
     } catch (e) {
         logger.error(e);
         return res.status(500).send('Internal server error');
