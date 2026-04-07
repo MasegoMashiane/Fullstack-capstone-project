@@ -1,7 +1,8 @@
-import React from 'react';
+
 import { useNavigate } from 'react-router-dom';
 import { useAppContext } from '../../context/AuthContext';
 import { urlConfig } from '../../config';
+import React, { useState, useEffect } from "react";
 
 export default function Navbar() {
     

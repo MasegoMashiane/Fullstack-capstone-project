@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+// Correct single import at the top
+import React, { useState, useEffect } from "react";
+import { useAppContext } from '../../context/AuthContext';
+import { urlConfig } from '../../config';
 import { useNavigate } from 'react-router-dom';
-import urlConfig from '../../urlConfig';
-import './SearchPage.css';
+//import './Navbar.css';
 
 function SearchPage() {
     const navigate = useNavigate();

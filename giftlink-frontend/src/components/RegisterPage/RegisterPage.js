@@ -5,6 +5,7 @@ import { useAppContext } from '../../context/AuthContext';
 // Task 3: Import useNavigate
 import React, { useState } from 'react';
 import './RegisterPage.css';
+import { useNavigate } from "react-router-dom";
 
 function RegisterPage() {
 
