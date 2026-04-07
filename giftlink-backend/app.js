@@ -3,6 +3,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const pinoLogger = require('./logger');
+const authRoutes = require('./routes/authRoutes');
 
 const connectToDatabase = require('./models/db');
 const {loadData} = require("./util/import-mongo/index");
@@ -27,6 +28,8 @@ const giftRoutes = require('./routes/giftRoutes');
 
 // Search API Task 1: import the searchRoutes and store in a constant called searchRoutes
 const searchRoutes = require('./routes/searchRoutes');
+
+app.use('/api/auth', authRoutes);
 
 
 const pinoHttp = require('pino-http');
