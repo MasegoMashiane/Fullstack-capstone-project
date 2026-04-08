@@ -1,4 +1,4 @@
-
+/*jshint esversion: 8 */
 import { useNavigate } from 'react-router-dom';
 import { useAppContext } from '../../context/AuthContext';
 import { urlConfig } from '../../config';

@@ -1,3 +1,4 @@
+/*jshint esversion: 8 */
 // Task 1: Import urlConfig
 import { urlConfig } from '../../config';
 // Task 2: Import useAppContext
